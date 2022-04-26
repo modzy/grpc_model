@@ -13,11 +13,15 @@ from ...grpc_model.src.auto_generated.model2_template.model_pb2_grpc import Modz
 from ...grpc_model.src.model_server import get_server_port
 
 HOST = "localhost"
+PORT = get_server_port()
 BATCH_SIZE = 8
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
 
+def override_server_URL(_host=HOST, _port=get_server_port()):
+    HOST = _host
+    PORT = _port
 
 def run(model_input):
     def create_input(input_text: Dict[str, bytes]) -> InputItem:
@@ -34,7 +38,7 @@ def run(model_input):
                 output = output_item.output["results.json"]
             LOGGER.info(f"gRPC client received: {json.loads(output.decode())}")
 
-    port = get_server_port()
+    port = PORT #get_server_port()
     LOGGER.info(f"Connecting to gRPC server on {HOST}:{port}")
     with grpc.insecure_channel(f"{HOST}:{port}") as grpc_channel:
         grpc_client_stub = ModzyModelStub(grpc_channel)
