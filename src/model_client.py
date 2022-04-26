@@ -20,6 +20,8 @@ logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
 
 def override_server_URL(_host=HOST, _port=get_server_port()):
+    global HOST
+    global PORT
     HOST = _host
     PORT = _port
 
