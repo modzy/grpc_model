@@ -14,7 +14,7 @@ from ...grpc_model.src.model_server import get_server_port
 
 HOST = "localhost"
 PORT = get_server_port()
-BATCH_SIZE = 2
+BATCH_SIZE = 8
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
