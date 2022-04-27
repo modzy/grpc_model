@@ -14,7 +14,7 @@ from ...grpc_model.src.model_server import get_server_port
 
 HOST = "localhost"
 PORT = get_server_port()
-BATCH_SIZE = 1
+BATCH_SIZE = 2
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ def run(model_input):
                 output = output_item.output["results.json"]
             LOGGER.info(f"gRPC client received: {json.loads(output.decode())}")
 
-    port = PORT #get_server_port()
+    port = PORT
     LOGGER.info(f"Connecting to gRPC server on {HOST}:{port}")
     with grpc.insecure_channel(f"{HOST}:{port}") as grpc_channel:
         grpc_client_stub = ModzyModelStub(grpc_channel)
@@ -52,17 +52,35 @@ def run(model_input):
             )
             return
 
-        LOGGER.info(f"Sending single input.")
-        run_request = RunRequest(inputs=[create_input(model_input)])
-        single_response = grpc_client_stub.Run(run_request)
-        unpack_and_report_outputs(single_response)
 
-        LOGGER.info("~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~")
+        results = []
+        if type(model_input) == list:
+            LOGGER.info(f"Sending batch of input.")
+            #run_request_batch = RunRequest(inputs=[create_input(model_input) for _ in range(BATCH_SIZE)])
 
-        LOGGER.info(f"Sending batch of input.")
-        run_request_batch = RunRequest(inputs=[create_input(model_input) for _ in range(BATCH_SIZE)])
-        batch_response = grpc_client_stub.Run(run_request_batch)
-        unpack_and_report_outputs(batch_response)
+            process_cycles = int(len(model_input)/BATCH_SIZE)
+            for index in range(process_cycles):
+                run_request_batch = RunRequest(inputs=[create_input(model_input) for input_data in model_input[(index*BATCH_SIZE):((index+1)*BATCH_SIZE)]])
+                batch_response = grpc_client_stub.Run(run_request_batch)
+                results.append(unpack_and_report_outputs(batch_response))
+
+            #process last < BATCH_SIZE group
+            run_request_batch = RunRequest(inputs=[create_input(model_input) for input_data in
+                                                   model_input[(process_cycles * BATCH_SIZE):]])
+            batch_response = grpc_client_stub.Run(run_request_batch)
+            results.append(unpack_and_report_outputs(batch_response))
+
+        else:
+            LOGGER.info(f"Sending single input.")
+            run_request = RunRequest(inputs=[create_input(model_input)])
+            single_response = grpc_client_stub.Run(run_request)
+            results.append( unpack_and_report_outputs(single_response) )
+
+        return results
+
+
+
+
 
 
 if __name__ == "__main__":
