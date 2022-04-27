@@ -66,7 +66,7 @@ def run(model_input):
 
             process_cycles = int(len(model_input)/BATCH_SIZE)
             for index in range(process_cycles):
-                run_request_batch = RunRequest(inputs=[create_input(model_input) for input_data in model_input[(index*BATCH_SIZE):((index+1)*BATCH_SIZE)]])
+                run_request_batch = RunRequest(inputs=[create_input(input_data) for input_data in model_input[(index*BATCH_SIZE):((index+1)*BATCH_SIZE)]])
                 batch_response = grpc_client_stub.Run(run_request_batch)
                 results.append(unpack_and_report_outputs(batch_response))
 
