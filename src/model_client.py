@@ -33,12 +33,18 @@ def run(model_input):
         return input_item
 
     def unpack_and_report_outputs(run_response: RunResponse):
+        unpacked_results = []
         for output_item in run_response.outputs:
             if "error" in output_item.output:
                 output = output_item.output["error"]
+                unpacked_results.append(output)
             else:
                 output = output_item.output["results.json"]
+                unpacked_results.append(output)
+
             LOGGER.info(f"gRPC client received: {json.loads(output.decode())}")
+        return unpacked_results
+
 
     port = PORT
     LOGGER.info(f"Connecting to gRPC server on {HOST}:{port}")
