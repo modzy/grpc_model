@@ -71,7 +71,7 @@ def run(model_input):
                 results.append(unpack_and_report_outputs(batch_response))
 
             #process last < BATCH_SIZE group
-            run_request_batch = RunRequest(inputs=[create_input(model_input) for input_data in
+            run_request_batch = RunRequest(inputs=[create_input(input_data) for input_data in
                                                    model_input[(process_cycles * BATCH_SIZE):]])
             batch_response = grpc_client_stub.Run(run_request_batch)
             results.append(unpack_and_report_outputs(batch_response))
