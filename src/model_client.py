@@ -68,19 +68,19 @@ def run(model_input):
             for index in range(process_cycles):
                 run_request_batch = RunRequest(inputs=[create_input(input_data) for input_data in model_input[(index*BATCH_SIZE):((index+1)*BATCH_SIZE)]])
                 batch_response = grpc_client_stub.Run(run_request_batch)
-                results.append(unpack_and_report_outputs(batch_response))
+                results = results + unpack_and_report_outputs(batch_response)
 
             #process last < BATCH_SIZE group
             run_request_batch = RunRequest(inputs=[create_input(input_data) for input_data in
                                                    model_input[(process_cycles * BATCH_SIZE):]])
             batch_response = grpc_client_stub.Run(run_request_batch)
-            results.append(unpack_and_report_outputs(batch_response))
+            results = results + unpack_and_report_outputs(batch_response)
 
         else:
             LOGGER.info(f"Sending single input.")
             run_request = RunRequest(inputs=[create_input(model_input)])
             single_response = grpc_client_stub.Run(run_request)
-            results.append( unpack_and_report_outputs(single_response) )
+            results = results + unpack_and_report_outputs(single_response)
 
         return results
 
