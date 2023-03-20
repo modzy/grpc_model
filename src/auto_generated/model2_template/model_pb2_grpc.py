@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import model_pb2 as model__pb2
+from .....grpc_model.src.auto_generated.model2_template import model_pb2 as model__pb2
 
 
 class ModzyModelStub(object):
